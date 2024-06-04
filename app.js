@@ -1,10 +1,12 @@
-const express = require("express");
-const crypto = require("node:crypto");
-const cors = require("cors");
+import express from "express";
+import crypto from "node:crypto";
+import cors from "cors";
 
-const movies = require("./movies");
-const { validateMovie, validatePartialMovie } = require("./schemas/movies");
+import { readJSON } from "./utils.js";
 
+import { validateMovie, validatePartialMovie } from "./schemas/movies.js";
+
+const movies = readJSON("./movies.json");
 const app = express();
 app.use(express.json());
 app.use(

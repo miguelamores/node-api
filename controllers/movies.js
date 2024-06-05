@@ -1,72 +1,57 @@
-import { readJSON } from "../utils.js";
+import { MovieModel } from "../models/local-file/movie.js";
 
 import { validateMovie, validatePartialMovie } from "../schemas/movies.js";
 
-const movies = readJSON("./movies.json");
-
 export class MovieController {
-  static getAll(req, res) {
+  static async getAll(req, res) {
     const { genre } = req.query;
-    if (genre) {
-      const filteredMovies = movies.filter((movie) =>
-        movie.genre.some((gen) => gen.toLowerCase() === genre.toLowerCase())
-      );
-      res.json(filteredMovies);
-    }
+    const movies = await MovieModel.getAll({ genre });
     res.json(movies);
   }
 
-  static getById(req, res) {
+  static async getById(req, res) {
     const { id } = req.params;
-    const movie = movies.find((movie) => movie.id === id);
-    if (!movie) {
-      res.status(404).json({ message: "Movie not found" });
-    }
+    const movie = await MovieModel.getById({ id });
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
 
     res.json(movie);
   }
 
-  static create(req, res) {
+  static async create(req, res) {
     const result = validateMovie(req.body);
 
     if (!result.success)
       return res.status(400).json({ error: JSON.parse(result.error.message) });
 
-    const newMovie = { id: crypto.randomUUID(), ...result.data };
-    movies.push(newMovie);
+    const newMovie = await MovieModel.create({ input: result.data });
 
     res.status(201).json(newMovie);
   }
 
-  static delete(req, res) {
+  static async delete(req, res) {
     const { id } = req.params;
 
-    const movieIndex = movies.findIndex((movie) => movie.id === id);
+    const result = await MovieModel.delete({ id });
 
-    if (movieIndex === -1) {
+    if (result === false) {
       return res.status(404).json({ message: "Movie not found" });
     }
 
-    movies.splice(movieIndex, 1);
     res.json({ message: "Movie deleted successfully" });
   }
 
-  static update(req, res) {
+  static async update(req, res) {
     const { id } = req.params;
     const result = validatePartialMovie(req.body);
 
     if (!result.success)
       return res.status(400).json({ error: JSON.parse(result.error.message) });
 
-    const movieIndex = movies.findIndex((movie) => movie.id === id);
+    const updatedMovie = await MovieModel.update({ id, input: result.data });
 
-    if (movieIndex === -1) {
+    if (updatedMovie === false) {
       return res.status(404).json({ message: "Movie not found" });
     }
-
-    const updatedMovie = { ...movies[movieIndex], ...result.data };
-
-    movies[movieIndex] = updatedMovie;
 
     return res.json(updatedMovie);
   }

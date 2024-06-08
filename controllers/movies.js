@@ -1,5 +1,6 @@
 // import { MovieModel } from "../models/local-file/movie.js";
-import { MovieModel } from "../models/mongodb/movies.js";
+// import { MovieModel } from "../models/mongodb/movies.js";
+import { MovieModel } from "../models/mysql/movies.js";
 
 import { validateMovie, validatePartialMovie } from "../schemas/movies.js";
 

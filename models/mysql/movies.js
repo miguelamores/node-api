@@ -98,17 +98,11 @@ export class MovieModel {
   }
 
   static async update({ id, input }) {
-    const setClause = Object.keys(input)
-      .map((field) => `${field} = ?`)
-      .join(", ");
-
-    const values = [...Object.values(input), id];
-
     try {
-      await connection.query(
-        `UPDATE movie SET ${setClause} WHERE bin_to_uuid(id) = ?;`,
-        values
-      );
+      await connection.query("UPDATE movie SET ? WHERE bin_to_uuid(id) = ?;", [
+        input,
+        id,
+      ]);
 
       const [movie] = await connection.query(
         "SELECT * FROM movie WHERE bin_to_uuid(id) = ?;",
